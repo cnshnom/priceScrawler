@@ -16,7 +16,7 @@ driver.get("https://www.wg-gesucht.de/1-zimmer-wohnungen-in-Muenchen.90.1.1.0.ht
 html = driver.page_source
 soup = BeautifulSoup(html, 'html.parser')
 
-#use soup get price---------
+#use soup to get all attributes
 all_title =[]
 all_price= []
 all_space = []
@@ -25,7 +25,7 @@ all_district = []
 all_address =[]
 all_rooms =[]
 
-#get all attribute from a single page(soup)
+#get all attributes from a single page(soup)
 def getStrings(soup):
     #title
     div_title_container = soup.find_all('h3', class_='truncate_title noprint')  
@@ -81,7 +81,7 @@ getStrings(soup)
 #print(len(all_price))
 #print(all_price)
 
-#new pages by click next button
+#go to the next 5 pages by click next button
 for i in range(5):
     wait = WebDriverWait(driver, 20)
     button = driver.find_element(by=By.XPATH, value='//a[@class="page-link next"]')
@@ -113,7 +113,7 @@ print(sumSpace)
 print(count)
 
 
-# all attribute into csv file
+# export all attributes into csv file
 
 with open('housing.csv', 'w', encoding='utf8', newline='') as f:
     thewriter = writer(f)
