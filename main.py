@@ -24,6 +24,7 @@ all_time = []
 all_district = []
 all_address =[]
 all_rooms =[]
+all_link = []
 
 #get all attributes from a single page(soup)
 def getStrings(soup):
@@ -34,7 +35,7 @@ def getStrings(soup):
      for t in items_title:
         all_title.append(t.contents[0].strip().replace('\n', '').replace(' ', ''))
 
-    #print(all_title)
+
 
     #price
     div_container = soup.find_all(lambda tag: tag.name == 'div' and tag.get('class') == ['col-xs-3'])  
@@ -43,7 +44,7 @@ def getStrings(soup):
         items_price= d.find_all('b')
         for p in items_price:
             all_price.append(p.contents[0].replace(' €', ''))
-    #print(all_price)
+
 
     #space
     div_space_container = soup.find_all('div', class_='col-xs-3 text-right')  
@@ -52,7 +53,7 @@ def getStrings(soup):
         items_space= d.find_all('b')
         for s in items_space:
             all_space.append(s.contents[0].replace(' m²', ''))
-    #print(all_space)
+
 
     #time
     div_time_container = soup.find_all('div', class_='col-xs-5 text-center')  
@@ -61,7 +62,7 @@ def getStrings(soup):
 
             all_time.append(d.contents[0].strip().replace('\n', '').replace('ab', '').replace(' ', ''))
 
-    #print(all_time)
+  
 
     #room,district, address
     div_district_container = soup.find_all('div', class_='col-xs-11')  
@@ -72,14 +73,21 @@ def getStrings(soup):
             all_rooms.append(di.contents[0].strip().replace('\n', '').replace('ab', '').replace(' ', '').split("|")[0])
             all_district.append(di.contents[0].strip().replace('\n', '').replace('ab', '').replace(' ', '').split("|")[1])
             all_address.append(di.contents[0].strip().replace('\n', '').replace('ab', '').replace(' ', '').split("|")[2])
-    #print(all_rooms)
-    #print(all_district)
-    #print(all_address)
+   
+    #link
+    div_link_container = soup.find_all('h3', class_='truncate_title noprint')
+
+    for l in div_link_container:
+     items_link= l.find_all('a', href = True)
+     for a in items_link:
+        all_link.append(a['href'])
+
+    
+
 
 # first page attributes
 getStrings(soup)
-#print(len(all_price))
-#print(all_price)
+
 
 #go to the next 5 pages by click next button
 for i in range(5):
@@ -99,6 +107,10 @@ for i in range(5):
 sumPrice = 0
 sumSpace = 0
 count = 0
+averagePrice = 0
+averageSpace = 0
+averagePS = 0
+
 
 for i in range(0,len(all_district)):
     if all_district[i].find("Schwing") == -1:
@@ -108,16 +120,16 @@ for i in range(0,len(all_district)):
         sumPrice = sumPrice + int(all_price[i])
         count = count +1
 
-print(sumPrice)
-print(sumSpace)
-print(count)
+averagePrice = sumPrice/count
+averageSpace = sumSpace/count
+averagePS = sumPrice/sumSpace
 
 
 # export all attributes into csv file
 
 with open('housing.csv', 'w', encoding='utf8', newline='') as f:
     thewriter = writer(f)
-    header = ['Title', 'District', 'Price €', 'Space m²', 'Rooms', 'available since']
+    header = ['Title', 'District', 'Price €', 'Space m²', 'Rooms', 'available since', 'URL']
     thewriter.writerow(header)
 
     for x in range(len(all_title)):
@@ -127,8 +139,10 @@ with open('housing.csv', 'w', encoding='utf8', newline='') as f:
         s = all_space[x]
         r = all_rooms[x]
         a = all_time[x]
-        print("Title= {}, District= {}, Price€= {}, Space m²= {}, Rooms= {}, Available since= {}".format(t, d, p, s, r, a))
-        info = [t,d,p,s,r,a]
+        l = "https://www.wg-gesucht.de"+all_link[x]
+        
+        #print("Title= {}, District= {}, Price€= {}, Space m²= {}, Rooms= {}, Available since= {}, Url= {}".format(t, d, p, s, r, a,l))
+        info = [t,d,p,s,r,a,l]
         thewriter.writerow(info)
 
     driver.quit()
